@@ -12,6 +12,8 @@ namespace ViagensMVC
     {
         protected void Application_Start()
         {
+            Application["appNome"] = "Viagens On Line";
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
