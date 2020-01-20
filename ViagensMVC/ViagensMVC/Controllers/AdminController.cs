@@ -35,11 +35,24 @@ namespace ViagensMVC.Controllers
         [HttpGet]
         public ActionResult DestinoNovo()
         {
-            return View();
+            ViewBag.Title = "Destino Novo";
+            return View("DestinoFormulario");
+        }
+
+        [HttpGet]
+        public ActionResult DestinoAlterar(int id)
+        {
+            return CarregarDestino(id, "Destino Alterar", "DestinoFormulario");
+        }
+
+        [HttpGet]
+        public ActionResult DestinoExcluir(int id)
+        {
+            return CarregarDestino(id, "Destino Excluir", "DestinoExcluir");
         }
 
         [HttpPost]
-        public ActionResult DestinoNovo(Destino destino)
+        public ActionResult DestinoSalvar(Destino destino)
         {
             try
             {
@@ -48,36 +61,93 @@ namespace ViagensMVC.Controllers
                     throw new ValidationException("Favor preencher todos os campos obrigatórios");
                 }
 
-                if (Request.Files.Count == 0 ||
-                    Request.Files[0].ContentLength == 0)
+                if (string.IsNullOrEmpty(destino.Foto) && (Request.Files.Count == 0 ||
+                    Request.Files[0].ContentLength == 0))
                 {
                     throw new ArgumentException("É Necessário enviar uma foto");
                 }
 
-                destino.Foto = GravarFoto(Request);
-
-                using(var db = ObterDbContext())
+                using (var db = ObterDbContext())
                 {
-                    db.Destinos.Add(destino);
+
+                    if (destino.DestinoId > 0)
+                    {
+                        var destinoOriginal = db.Destinos.Find(destino.DestinoId);
+
+                        destinoOriginal.Nome = destino.Nome;
+                        destinoOriginal.Pais = destino.Pais;
+                        destinoOriginal.Cidade = destino.Cidade;
+
+                        if (Request.Files.Count != 0 && Request.Files[0].ContentLength != 0)
+                        {
+                            destinoOriginal.Foto = GravarFoto(Request);
+                        }
+                    }
+                    else
+                    {
+                        destino.Foto = GravarFoto(Request);
+                        db.Destinos.Add(destino);
+
+                    }
+
                     db.SaveChanges();
                     return RedirectToAction(ActionDestinoListagem);
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(destino);
+                return View("DestinoFormulario", destino);
             }
+        }
+
+        [HttpPost]
+        public ActionResult DestinoExcluir(int id, FormCollection form)
+        {
+            if (id > 0)
+            {
+                using (var db = ObterDbContext())
+                {
+                    var destino = db.Destinos.Find(id);
+
+                    if (destino != null)
+                    {
+                        db.Destinos.Remove(destino);
+                        db.SaveChanges();
+                    }
+                }
+            }
+
+            return RedirectToAction(ActionDestinoListagem);
         }
 
         private string GravarFoto(HttpRequestBase Request)
         {
             string nome = Path.GetFileName(Request.Files[0].FileName);
             string pathVirtual = "~/Imagens";
-            pathVirtual += "/" + nome;
+            pathVirtual += ("/" + nome);
             string pathFisico = Request.MapPath(pathVirtual);
 
             Request.Files[0].SaveAs(pathFisico);
+
             return nome;
+        }
+
+
+        private ActionResult CarregarDestino(int id, string title, string view)
+        {
+            using (var db = ObterDbContext())
+            {
+                var destino = db.Destinos.Find(id);
+
+                if (destino != null)
+                {
+                    ViewBag.Title = title;
+                    return View(view, destino);
+                }
+            }
+
+            return RedirectToAction(ActionDestinoListagem);
         }
     }
 }

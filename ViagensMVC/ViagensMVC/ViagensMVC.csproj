@@ -223,6 +223,9 @@
     <Content Include="Views\ViagensOnLine\Inicio.cshtml" />
     <Content Include="Views\Admin\DestinoNovo.cshtml" />
     <Content Include="Views\Admin\DestinoListagem.cshtml" />
+    <Content Include="Views\Admin\DestinoAlterar.cshtml" />
+    <Content Include="Views\Admin\DestinoFormulario.cshtml" />
+    <Content Include="Views\Admin\DestinoExcluir.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Imagens\" />

@@ -18,7 +18,11 @@ footer {
     font-weight: bold;
 }
 
-imagemForm {
+.imagemForm {
     margin-bottom: 20px;
-    width: 500px;
+    width: 35%;
+}
+
+.divImagem{
+    padding-left: 5px;
 }
