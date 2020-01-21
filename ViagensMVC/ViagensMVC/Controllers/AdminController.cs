@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
 using ViagensMVC.Db;
@@ -10,6 +11,7 @@ using ViagensMVC.Models;
 
 namespace ViagensMVC.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
         private const string ActionDestinoListagem = "DestinoListagem";
@@ -17,7 +19,61 @@ namespace ViagensMVC.Controllers
         private ViagensOnlineDb ObterDbContext()
         {
             return new ViagensOnlineDb();
+        }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult Login(Usuario usuario)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    throw new ValidationException("Favor preencher Login e Senha");
+                }
+
+                using(var db = ObterDbContext())
+                {
+                    var existeUser = db.Usuarios.Select(u => u.Login == usuario.Login && u.Senha == usuario.Senha).Any();
+
+                    if(!existeUser)
+                    {
+                        throw new ArgumentException("Usuário e Senha não reconhecidos");
+                    }
+                }
+
+                //Um Array de claims. Claim é uma declaração que
+                // o usuário faz. Nesse caso, são duas: Ele se chama
+                // Administrador e pertence ao grupo admin
+                Claim[] claims = new Claim[2];
+                claims[0] = new Claim(ClaimTypes.Name, "Administrador");
+                claims[1] = new Claim(ClaimTypes.Role, "admin");
+
+                //Nome para identificar
+                string nomeAutenticacao = "AppViagensOnLineCookie";
+
+                //Identidade
+                ClaimsIdentity identity = new ClaimsIdentity(claims, nomeAutenticacao);
+
+                //Autentica
+                Request.GetOwinContext().Authentication.SignIn(identity);
+
+                //Redireciona para a pasta destinos
+                return RedirectToAction(ActionDestinoListagem);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(usuario);
+            }
+            
         }
 
         [HttpGet]
@@ -49,6 +105,12 @@ namespace ViagensMVC.Controllers
         public ActionResult DestinoExcluir(int id)
         {
             return CarregarDestino(id, "Destino Excluir", "DestinoExcluir");
+        }
+
+        [HttpGet]
+        public ActionResult DestinoVisualizar(int id)
+        {
+            return CarregarDestino(id, "Destino Visualizar", "DestinoVisualizar");
         }
 
         [HttpPost]

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Owin;
+using Microsoft.Owin.Security.Cookies;
 using Owin;
 
 [assembly: OwinStartup(typeof(ViagensMVC.Startup))]
@@ -21,7 +22,13 @@ namespace ViagensMVC
                     context.Request.Scheme, context.Request.Method, context.Request.Path, getTime());
                 });
             });
-        
+
+            app.UseCookieAuthentication(new CookieAuthenticationOptions()
+            {
+                 AuthenticationType = "AppViagensOnLineCookie",
+                 LoginPath = new PathString("/Admin/Login")
+            });
+
 
             string getTime()
             {

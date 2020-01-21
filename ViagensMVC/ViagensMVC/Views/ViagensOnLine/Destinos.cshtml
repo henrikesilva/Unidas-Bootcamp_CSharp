@@ -1,0 +1,31 @@
+﻿@model IList<ViagensMVC.Models.Destino>
+
+@{
+    ViewBag.Title = "Destinos";
+}
+
+<h2>Destinos</h2>
+
+@foreach(var destino in Model)
+{
+<div class="destinos-box">
+    <div>
+        <img src="~/Imagens//@destino.Foto" />
+    </div>
+
+    <div class="destinosNome">
+        <label>@destino.Nome</label>
+    </div>
+
+    <div class="destinosCidadePais">
+        <label>@destino.Cidade</label>
+    </div>
+
+    <div class="destinosCidadePais">
+        <label>@destino.Pais</label>
+    </div>
+</div>
+}
+
+<div style="clear:both"></div>
+
