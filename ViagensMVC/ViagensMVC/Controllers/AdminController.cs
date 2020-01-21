@@ -41,9 +41,9 @@ namespace ViagensMVC.Controllers
 
                 using(var db = ObterDbContext())
                 {
-                    var existeUser = db.Usuarios.Select(u => u.Login == usuario.Login && u.Senha == usuario.Senha).Any();
+                    var userDB = db.Usuarios.Where(u => u.Login == usuario.Login && u.Senha == usuario.Senha).FirstOrDefault();
 
-                    if(!existeUser)
+                    if(userDB == null)
                     {
                         throw new ArgumentException("Usuário e Senha não reconhecidos");
                     }
