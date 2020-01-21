@@ -35,7 +35,7 @@ namespace ViagensMVC.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                {
+                { 
                     throw new ValidationException("Favor preencher Login e Senha");
                 }
 
